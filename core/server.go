@@ -1,42 +1,59 @@
-package server
+package core
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
+	//"net/http"
+	"net/url"
 	"strings"
+	"github.com/Rahul6700/load-balancer/models"
 )
 
-var ServerArray []ServerArray;
+var ServerArray []models.ServerInput;
 
+// function to add to array
 func AddServer (c* gin.Context) {
 
-	data := c.BindJSON()
+	var myURL string
+	var data models.ServerInput
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.JSON(400, gin.H{"error" : "error binding json in AddServer func"})
+		return
+	}
 	
 	//validate whether json is empty or not
-	if !data.url || !data.port {
+	if data.URL == "" || data.Port == 0 {
 		c.JSON(404, gin.H{"error" : "missing URL or port number"})
 		return
 	}
 
 	//verify port num
-	if !(data.port >= 1 && data.port <= 65535) {
+	if !(data.Port >= 1 && data.Port <= 65535) {
 		c.JSON(403, gin.H{"error" : "invalid port number"})
 		return
 	}
 	
 	//validate url
 	// since its a http load balancer, out server url needs to be a 'http' or 'https' one, so we convert to that form if its not already
-	if !strings.HasPrefix(data.url, "http://") && !strings.HasPrefix(data.url, "https://") {
-		myURL := "http://" + data.url 
+	if !strings.HasPrefix(data.URL, "http://") && !strings.HasPrefix(data.URL, "https://") {
+		myURL = "http://" + data.URL 
 	} else {
-		myURL := data.url
+		myURL = data.URL
 	}
 	//go's built in url parser
-	parsedURL, err := url.ParseRequestURI(myURL)
+	_, err = url.ParseRequestURI(myURL)
 	if err != nil {
 		c.JSON(403, gin.H{"error" : "enter a valid URL"})
 		return
 	}
+
+	ServerArray = append(ServerArray, models.ServerInput{
+		URL : myURL,
+		Port : data.Port,
+	})
+
+	c.JSON(200, gin.H{"success" : "ip and port addedd successfully"})
+
 }
 
 
