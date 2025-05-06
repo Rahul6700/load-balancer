@@ -10,6 +10,7 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/addServer", core.AddServer)
+	r.GET("/ListServers", core.ListServers)
 
 	fmt.Println("server listening on port 8000")
 	r.Run(":8000")

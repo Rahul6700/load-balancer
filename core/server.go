@@ -56,5 +56,9 @@ func AddServer (c* gin.Context) {
 
 }
 
+// func to list all the config'd servers
+func ListServers (c* gin.Context) {
+	c.JSON(200, ServerArray)
+}
 
 
