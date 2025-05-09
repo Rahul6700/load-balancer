@@ -50,6 +50,7 @@ func AddServer (c* gin.Context) {
 	ServerArray = append(ServerArray, models.ServerInput{
 		URL : myURL,
 		Port : data.Port,
+		Active : 0,
 	})
 
 	c.JSON(200, gin.H{"success" : "ip and port addedd successfully"})
