@@ -22,16 +22,16 @@ func AddServer (c* gin.Context) {
 	}
 	
 	//validate whether json is empty or not
-	if data.URL == "" || data.Port == 0 {
-		c.JSON(404, gin.H{"error" : "missing URL or port number"})
+	if data.URL == "" {
+		c.JSON(404, gin.H{"error" : "missing URL"})
 		return
 	}
 
 	//verify port num
-	if !(data.Port >= 1 && data.Port <= 65535) {
-		c.JSON(403, gin.H{"error" : "invalid port number"})
-		return
-	}
+	// if !(data.Port >= 1 && data.Port <= 65535) {
+	// 	c.JSON(403, gin.H{"error" : "invalid port number"})
+	// 	return
+	// }
 	
 	//validate url
 	// since its a http load balancer, out server url needs to be a 'http' or 'https' one, so we convert to that form if its not already
@@ -49,7 +49,7 @@ func AddServer (c* gin.Context) {
 
 	ServerArray = append(ServerArray, models.ServerInput{
 		URL : myURL,
-		Port : data.Port,
+		//Port : data.Port,
 		Active : 0,
 	})
 

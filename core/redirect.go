@@ -30,3 +30,12 @@ func SelectServer () *models.ServerInput {
 
 }
 
+func ToServer (c* gin.Context) {
+	
+	//selecting the target server
+	target := SelectServer()
+
+	
+
+
+}
