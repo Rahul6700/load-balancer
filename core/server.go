@@ -8,13 +8,13 @@ import (
 	"github.com/Rahul6700/load-balancer/models"
 )
 
-var ServerArray []models.ServerInput;
+var ServerArray []models.ServerStruct;
 
 // function to add to array
 func AddServer (c* gin.Context) {
 
 	var myURL string
-	var data models.ServerInput
+	var data models.ServerStruct
 	err := c.BindJSON(&data)
 	if err != nil {
 		c.JSON(400, gin.H{"error" : "error binding json in AddServer func"})
@@ -47,13 +47,13 @@ func AddServer (c* gin.Context) {
 		return
 	}
 
-	ServerArray = append(ServerArray, models.ServerInput{
+	ServerArray = append(ServerArray, models.ServerStruct{
 		URL : myURL,
-		//Port : data.Port,
+		Port : data.Port,
 		Active : 0,
 	})
 
-	c.JSON(200, gin.H{"success" : "ip and port addedd successfully"})
+	c.JSON(200, gin.H{"success" : "ip addedd successfully"})
 
 }
 

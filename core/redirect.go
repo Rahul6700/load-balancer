@@ -5,10 +5,10 @@ import (
 	"github.com/Rahul6700/load-balancer/models"
 )
 
-func SelectServer () *models.ServerInput {
+func SelectServer () *models.ServerStruct {
 
 	//var to store the chosen server
-	var ChosenServer models.ServerInput;
+	var ChosenServer models.ServerStruct;
 	
 	ChosenServer = ServerArray[0] //chosing the first by default
 	
