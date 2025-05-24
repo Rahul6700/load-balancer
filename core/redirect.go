@@ -1,11 +1,11 @@
 package core
 
 import (
-	"fmt"
 	"github.com/Rahul6700/load-balancer/models"
+	"github.com/gin-gonic/gin"
 )
 
-func SelectServer () *models.ServerStruct {
+func SelectServer () models.ServerStruct {
 
 	//var to store the chosen server
 	var ChosenServer models.ServerStruct;
@@ -13,7 +13,7 @@ func SelectServer () *models.ServerStruct {
 	ChosenServer = ServerArray[0] //chosing the first by default
 	
 	var temp int
-	temp = 0
+	temp := 0
 	
 	// picking the server with the lowest 'Active' value
 	for i, server := range ServerArray {

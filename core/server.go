@@ -49,7 +49,6 @@ func AddServer (c* gin.Context) {
 
 	ServerArray = append(ServerArray, models.ServerStruct{
 		URL : myURL,
-		Port : data.Port,
 		Active : 0,
 	})
 
