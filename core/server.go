@@ -8,7 +8,7 @@ import (
 	"github.com/Rahul6700/load-balancer/models"
 )
 
-var ServerArray []models.ServerStruct;
+var serverList = &serverHeap{}
 
 // function to add to array
 func AddServer (c* gin.Context) {
@@ -47,10 +47,18 @@ func AddServer (c* gin.Context) {
 		return
 	}
 
-	ServerArray = append(ServerArray, models.ServerStruct{
-		URL : myURL,
-		Active : 0,
-	})
+	// ServerArray = append(ServerArray, models.ServerStruct{
+	// 	URL : myURL,
+	// 	Active : 0,
+	// })
+	//
+
+	server := &models.ServerStruct{
+		URL = myURL,
+		Active = 0
+	}
+
+	heap.Push(ServerList, server)
 
 	c.JSON(200, gin.H{"success" : "ip addedd successfully"})
 

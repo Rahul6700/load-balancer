@@ -7,6 +7,9 @@ import (
 )
 
 func main() {
+
+	heap.Init(ServerList) //min-heap
+
 	r := gin.Default()
 
 	r.POST("/addServer", core.AddServer)

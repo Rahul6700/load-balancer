@@ -13,7 +13,7 @@ func SelectServer () models.ServerStruct {
 	ChosenServer = ServerArray[0] //chosing the first by default
 	
 	var temp int
-	temp := 0
+	temp = 0
 	
 	// picking the server with the lowest 'Active' value
 	for i, server := range ServerArray {
@@ -31,9 +31,14 @@ func SelectServer () models.ServerStruct {
 }
 
 func ToServer (c* gin.Context) {
+
+	param := c.Param()
+	method := c.Request.Method()
 	
 	//selecting the target server
 	target := SelectServer()
+
+
 
 	
 
