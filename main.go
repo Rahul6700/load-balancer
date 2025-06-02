@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/Rahul6700/load-balancer/core"
+	"github.com/Rahul6700/load-balancer/models"
+	"container/heap"
 )
 
 func main() {
 
-	heap.Init(ServerList) //min-heap
+	heap.Init(&models.MyHeap) //min-heap
 
 	r := gin.Default()
 
 	r.POST("/addServer", core.AddServer)
-	r.GET("/ListServers", core.ListServers)
+	r.GET("/listServers", core.ListServers)
 
 	fmt.Println("server listening on port 8000")
 	r.Run(":8000")

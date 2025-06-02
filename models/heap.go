@@ -4,25 +4,46 @@ import (
 	"container/heap"
 )
 
-type ServerHeap []*models.ServerStruct
+// now ServerHeap is the data structure
+type ServerHeap []*ServerStruct
 
-func SelectServer() *models.ServerStruct {
-	if ServerPool.Len() == 0 {
-		return nil
-	}
-	server := heap.Pop(ServerPool).(*models.ServerStruct)
+//declaring the global heap
+var MyHeap ServerHeap;
+
+func SelectServer() ServerStruct {
+	//var to store the server
+	var server ServerStruct
+
+	//remove the node from the heap
+	server = heap.Pop(&MyHeap).(ServerStruct)
+
+	//increment active value
 	server.Active++
-	heap.Push(ServerPool, server)
+
+	//add it to the heap again to re-heapify so it goes to the right place
+	heap.Push(&MyHeap, server)
+
 	return server
 }
 
-func DoneWithServer(server *models.ServerStruct) {
+func DoneWithServer(server *ServerStruct) {
+	//decrement active counter after the server is done
 	server.Active--
-	heap.Fix(ServerPool, server.Index)
+	heap.Fix(&MyHeap, server.Index)
 }
 
-func (h ServerHeap) Len() int           { return len(h) }
-func (h ServerHeap) Less(i, j int) bool { return h[i].Active < h[j].Active }
+//helper functions
+
+//for heap len
+func (h ServerHeap) Len() int {
+	return len(h) 
+
+}
+
+func (h ServerHeap) Less(i, j int) bool {
+	return h[i].Active < h[j].Active
+}
+
 func (h ServerHeap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 	h[i].Index = i
@@ -31,7 +52,7 @@ func (h ServerHeap) Swap(i, j int) {
 
 func (h *ServerHeap) Push(x any) {
 	n := len(*h)
-	server := x.(*models.ServerStruct)
+	server := x.(*ServerStruct)
 	server.Index = n
 	*h = append(*h, server)
 }
@@ -44,3 +65,6 @@ func (h *ServerHeap) Pop() any {
 	*h = old[0 : n-1]
 	return server
 }
+
+
+
