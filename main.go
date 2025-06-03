@@ -17,6 +17,7 @@ func main() {
 	r.POST("/addServer", core.AddServer)
 	r.GET("/listServers", core.ListServers)
 	r.POST("/deleteServer", core.DeleteServer)
+	r.NoRoute(core.Balancer)
 
 	fmt.Println("server listening on port 8000")
 	r.Run(":8000")
