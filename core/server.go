@@ -77,14 +77,36 @@ func serverExists(h *models.ServerHeap, url string) (*models.ServerStruct, int, 
 func DeleteServer(c *gin.Context) {
 
 	var server models.ServerStruct
+	myURL := server.URL
+	var err error
 
 	if err := c.BindJSON(&server); err != nil {
 		c.JSON(400, gin.H{"error": "failed to parse JSON in deleteServer"})
 		return
 	}
 
+	//validate whether json is empty or not
+	if server.URL == "" {
+		c.JSON(404, gin.H{"error" : "missing URL"})
+		return
+	}
+
+	//validate url
+	// since its a http load balancer, out server url needs to be a 'http' or 'https' one, so we convert to that form if its not already
+	if !strings.HasPrefix(server.URL, "http://") && !strings.HasPrefix(server.URL, "https://") {
+		myURL = "http://" + server.URL 
+	} else {
+		myURL = server.URL
+	}
+	//go's built in url parser
+	_, err = url.ParseRequestURI(myURL)
+	if err != nil {
+		c.JSON(403, gin.H{"error" : "enter a valid URL"})
+		return
+	}
+
 	//checking if the server exists in the heap
-	target, index, found := serverExists(&models.MyHeap, server.URL)
+	target, index, found := serverExists(&models.MyHeap, myURL)
 	if !found {
 		c.JSON(404, gin.H{"error": "the server does not exist in the heap"})
 		return
