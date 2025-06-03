@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/gin-gonic/gin"
+	"fmt"
 	//"net/http"
 	"net/url"
 	"strings"
@@ -62,6 +63,39 @@ func AddServer (c* gin.Context) {
 	c.JSON(200, gin.H{"success" : "ip addedd successfully"})
 
 }
+
+// Helper function to check if a URL/IP exists in the heap
+func serverExists(h *models.ServerHeap, url string) (*models.ServerStruct, int, bool) {
+	for i, s := range *h {
+		if s.URL == url {
+			return s, i, true
+		}
+	}
+	return nil, -1, false
+}
+
+func DeleteServer(c *gin.Context) {
+
+	var server models.ServerStruct
+
+	if err := c.BindJSON(&server); err != nil {
+		c.JSON(400, gin.H{"error": "failed to parse JSON in deleteServer"})
+		return
+	}
+
+	//checking if the server exists in the heap
+	target, index, found := serverExists(&models.MyHeap, server.URL)
+	if !found {
+		c.JSON(404, gin.H{"error": "the server does not exist in the heap"})
+		return
+	}
+
+	// Remove the server from the heap
+	heap.Remove(&models.MyHeap, index)
+
+	c.JSON(200, gin.H{"success": fmt.Sprintf("removed the server %s", target.URL)})
+}
+
 
 // func to list all the config'd servers
 func ListServers (c* gin.Context) {
