@@ -55,7 +55,7 @@ func Balancer(c* gin.Context) {
 		return
 	}
 	//this decrements the Active field for the selected server after its done
-	defer models.DoneWithServer(&server)
+	defer models.DoneWithServer(server)
 
 	ProxyRequest(c, server.URL)
 

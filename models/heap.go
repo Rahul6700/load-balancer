@@ -4,40 +4,34 @@ import (
 	"container/heap"
 )
 
-// now ServerHeap is the data structure
+// ServerHeap is the data structure
 type ServerHeap []*ServerStruct
 
-//declaring the global heap
-var MyHeap ServerHeap;
+// declaring the global heap
+var MyHeap ServerHeap
 
-func SelectServer() ServerStruct {
-	//var to store the server
-	var server ServerStruct
-
-	//remove the node from the heap
-	server = heap.Pop(&MyHeap).(ServerStruct)
-
-	//increment active value
+func SelectServer() *ServerStruct {
+	// var to store the server (now using pointer)
+	var server *ServerStruct
+	// remove the node from the heap
+	server = heap.Pop(&MyHeap).(*ServerStruct)
+	// increment active value
 	server.Active++
-
-	//add it to the heap again to re-heapify so it goes to the right place
+	// add it to the heap again to re-heapify so it goes to the right place
 	heap.Push(&MyHeap, server)
-
 	return server
 }
 
 func DoneWithServer(server *ServerStruct) {
-	//decrement active counter after the server is done
+	// decrement active counter after the server is done
 	server.Active--
 	heap.Fix(&MyHeap, server.Index)
 }
 
-//helper functions
-
-//for heap len
+// helper functions
+// for heap len
 func (h ServerHeap) Len() int {
-	return len(h) 
-
+	return len(h)
 }
 
 func (h ServerHeap) Less(i, j int) bool {
@@ -65,6 +59,3 @@ func (h *ServerHeap) Pop() any {
 	*h = old[0 : n-1]
 	return server
 }
-
-
-
