@@ -2,7 +2,10 @@ package models
 
 import (
 	"container/heap"
+	"sync"
 )
+
+var lock sync.Mutex // this is the mutex lock we'll use to lock the heap to prevent race conditions when one goroutine is modyfing it
 
 // ServerHeap is the data structure
 type ServerHeap []*ServerStruct
@@ -11,6 +14,10 @@ type ServerHeap []*ServerStruct
 var MyHeap ServerHeap
 
 func SelectServer() *ServerStruct {
+
+	lock.Lock() // lock the mutex here
+	defer lock.Unlock() // this runs the unlock call once the function ends
+
 	// var to store the server (now using pointer)
 	var server *ServerStruct
 	// remove the node from the heap
@@ -23,6 +30,8 @@ func SelectServer() *ServerStruct {
 }
 
 func DoneWithServer(server *ServerStruct) {
+	lock.Lock() 
+	defer lock.Unlock()
 	// decrement active counter after the server is done
 	server.Active--
 	heap.Fix(&MyHeap, server.Index)
