@@ -10,6 +10,20 @@ import (
 	"container/heap"
 )
 
+var NameNodeSlice []string // has the url:port for all the namenode servers
+
+func AddNameNode (c* gin.Context) {
+	var URL string
+	err := c.BindJSON(&data)
+	if err != nil {
+		c.JSON(400, gin.H{"error" : "error binding json in AddNameNode"})
+	}
+	NameNodeSlice = append(NameNodeSlice, data.URL)
+	c.JSON(200, gin.H{"success" : fmt.Sprintf("successfully added %s",data.URL)})
+	return
+}
+
+
 // function to add to array
 func AddServer (c* gin.Context) {
 
