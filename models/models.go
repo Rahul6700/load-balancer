@@ -6,3 +6,5 @@ type ServerStruct struct {
 	Active int `json:"active"`
 	Index int //needed for heap
 }
+
+

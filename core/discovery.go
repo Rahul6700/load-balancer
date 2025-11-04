@@ -15,6 +15,10 @@ var currentLeaderAddress string // hold the str url of the current leader
 // and once every few seconds we poll all the namenodes to check which is the leader namenode -> store this in a variable
 func LeaderDiscovery(){
 	// Time.ticker is used when you want something to keep happening once every few seconds/mins
+
+func GetCurrentLeader() string {
+    leaderLock.RLock()
+    defer leaderLock.RUnlock()
 	// you initialize the ticker with the time interval
 	ticker := time.NewTicker(1*time.Second) // here we're running for every 1 sec
 

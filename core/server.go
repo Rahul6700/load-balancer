@@ -78,6 +78,7 @@ func AddServer (c* gin.Context) {
 
 }
 
+
 // Helper function to check if a URL/IP exists in the heap
 func serverExists(h *models.ServerHeap, url string) (*models.ServerStruct, int, bool) {
 	for i, s := range *h {
