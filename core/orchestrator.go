@@ -3,6 +3,9 @@ package core
 import (
 	"github.com/Rahul6700/foodo/shared"
 	"github.com/Rahul6700/load-balancer/models"
+	"bytes"
+	"encoding/json"
+	"net/http"
 )
 
 // this is the struct that we use inside the HandleUpload function 
@@ -13,6 +16,8 @@ type ClientUploadRequest struct {
 		Index int
 	}
 }
+
+var currentLeaderAddress string // the is the url:port of the current raft cluster leader
 
 func HandleUpload (c *gin.Conext) {
 
@@ -69,9 +74,42 @@ func HandleUpload (c *gin.Conext) {
 			chunkIndex = chunk.Index,
 			Locations = chunk.locationsSlice
 		})
-
 	}
 
+	// creates a raftCommand that will be sent to the namenode
+	// it contains the operation (adding file to DN), filename and the raftChunks (slice of chunk metadata)
+	raftCommand := shared.RaftCommand {
+		Operation: "REGISTER_FILE",
+		Filename: variable.Filename,
+		Chunks: raftChunks
+	}
 	
+	// now we have raft Command which is a struct of metadata
+	// we should sent this metadata to the namenode now, but this is not the right format
+	// we'll convert out go struct into json byte slice and send that over the network (use the "marshal()" function for this)
+
+	JSONByteSlice, err := json.marshal(raftCommand) // JSONByteSlice is the JSON byte slice of our raftCommand struct
+	if err != nil {
+		c.JSON(500, gin.H{"error" : "error converting raftCommand to JSONByteSlice in the loadb"})
+		return
+	}
+
+	leaderAddr := GetCurrentLeader() // func in discovery.go
+	if leaderAddr == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error" : "No NameNode Leader found"})
+		return
+	}
+
+	// now that we have found the leader NameNode we send the JSONByteSlice to it, so it can store the metadata
+	// we'll use a HTTP post req for this, we'll construct the ReqURL for the req
+	ReqURL := leaderAddr + "/raft/propose" // so it'll look something like http://127.0.0.1:8080/raft/propose
+	resp, err := http.Post(ReqURL, "application/json", bytes.NewBuffer(JSONByteSlice)) // sending the post req to ReqURl
+	if err != nil || resp.StatusCode != http.StatsOK {
+		c.JSON(500, gin.H{"error" : "couldnt send the loadb plan to the namenode thru http post"})
+	}
+
+	// if everything is successful, the plan is sent
+	c.JSON(201, gin.H{"success" : true, "upload_plan" : uploadPlan})
+
 
 }
