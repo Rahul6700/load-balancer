@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/Rahul6700/foodo/shared"
+	"github.com/Rahul6700/Foodo/shared"
 	"github.com/Rahul6700/load-balancer/models"
 	"bytes"
 	"encoding/json"
@@ -28,7 +28,7 @@ func HandleUpload (c *gin.Context) {
 
 	var variable ClientUploadRequest// the variable stores the client request content
 	if err := c.BindJSON(&variable); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request :details": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request:" + err.Error()})
 		return
 	}
 
@@ -71,11 +71,13 @@ func HandleUpload (c *gin.Context) {
 //         Locations:  ["http://dn3:9000", "http://dn1:9000", "http://dn2:9000"]
 //     }
 // ]
-		raftChunks = append(raftChunks, shared.ChunkStruct{
-			chunkID: chunk.chunkID,
-			chunkIndex: chunk.Index,
-			Locations: locationsSlice
-		})
+
+	raftChunks = append(raftChunks, shared.ChunkStruct{
+    ChunkID:    chunk.ChunkID,
+    ChunkIndex: chunk.Index,
+    Locations:  locationsSlice,
+	})
+
 	}
 
 	// creates a raftCommand that will be sent to the namenode
@@ -83,7 +85,7 @@ func HandleUpload (c *gin.Context) {
 	raftCommand := shared.RaftCommand {
 		Operation: "REGISTER_FILE",
 		Filename: variable.Filename,
-		Chunks: raftChunks
+		Chunks: raftChunks,
 	}
 	
 	// now we have raft Command which is a struct of metadata
@@ -111,7 +113,7 @@ func HandleUpload (c *gin.Context) {
 		return
 	}
 
-	resp.body.Close()
+	resp.Body.Close()
 
 	// if everything is successful, the plan is sent
 	c.JSON(201, gin.H{"success" : true, "upload_plan" : uploadPlan})
