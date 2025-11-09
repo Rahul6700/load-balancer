@@ -14,12 +14,15 @@ func main() {
 
 	r := gin.Default()
 
+	go core.StartLeaderDiscovery()
+
 	r.POST("/addServer", core.AddServer)
 	r.GET("/listServers", core.ListServers)
 	r.POST("/deleteServer", core.DeleteServer)
 	
 	r.POST("/uploadFile", core.HandleUpload)
 	r.POST("/heartbeat", core.HandleHeartbeat)
+	r.GET("/get-file-locations", core.HandleGetFileLocations)
 	
 	//r.NoRoute(core.Balancer)
 

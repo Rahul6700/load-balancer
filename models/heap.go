@@ -19,6 +19,9 @@ func SelectServer() *ServerStruct {
 	lock.Lock() // lock the mutex here
 	defer lock.Unlock() // this runs the unlock call once the function ends
 
+	if MyHeap.Len() == 0 {
+		return nil // return nil if the heap is empty
+	}
 	// var to store the server (now using pointer)
 	var server *ServerStruct
 	// remove the node from the heap

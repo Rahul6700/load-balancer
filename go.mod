@@ -3,7 +3,7 @@ module github.com/Rahul6700/load-balancer
 go 1.25.3
 
 require (
-	github.com/Rahul6700/Foodo v0.0.0-20251108180256-f5dbd246431d
+	github.com/Rahul6700/Foodo v0.0.0-20251109135216-8c9acc245f8c
 	github.com/gin-gonic/gin v1.11.0
 )
 

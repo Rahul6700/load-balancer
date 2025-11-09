@@ -7,57 +7,67 @@ import (
 	"time"
 )
 
-var mutex sync.RWMutex // mutex lock to lock the currentLeader var
+var (
+	// The list of all your Namenodes
+	NameNodeSlice = []string{
+		"http://localhost:8001",
+		"http://localhost:8002",
+		"http://localhost:8003",
+	}
 
-var currentLeaderAddress string // hold the str url of the current leader
+	// The lock that protects the leader address
+	leaderLock sync.RWMutex
+	
+	// The variable to store the leader's address
+	currentLeaderAddress string
+)
 
-// defining statically for now, maybe implement an endpoint to add dynamically later ?
-var NameNodeSlice = []string{
-	"http://localhost:8001",
-	"http://localhost:8002",
-	"http://localhost:8003",
-}
-
-// we need to start a background go-routines that keeps running
-// and once every few seconds we poll all the namenodes to check which is the leader namenode -> store this in a variable
-func LeaderDiscovery(){
-	// Time.ticker is used when you want something to keep happening once every few seconds/mins
-	// you initialize the ticker with the time interval
-	ticker := time.NewTicker(1*time.Second) // here we're running for every 1 sec
+// StartLeaderDiscovery is a background goroutine you'll start from main.go
+func StartLeaderDiscovery() {
+	ticker := time.NewTicker(2 * time.Second) // Poll every 2 seconds
 
 	for range ticker.C {
 		foundLeader := false
-		for _, peer := range NameNodeSlice { // for every URL in the namenode Url slice
-			addr := peer + "/status" // so it becomes "https://localhost:8080/status"
-			resp, err := http.Get(addr) // sends a get req to the addr, gets back response and err
-			if err == nil && resp.StatusCode == http.StatusOK { // we successfully found a leader
-				mutex.Lock()
+		for _, peer := range NameNodeSlice {
+			addr := peer + "/status"
+			resp, err := http.Get(addr)
+			
+			// --- Use the 'http.StatusOK' constant ---
+			if err == nil && resp.StatusCode == http.StatusOK {
+				
+				// --- We found the leader ---
+				// Use the 'Write' lock
+				leaderLock.Lock() 
 				if currentLeaderAddress != peer {
 					log.Printf("New leader discovered: %s\n", peer)
 					currentLeaderAddress = peer
 				}
-				mutex.Unlock()
+				leaderLock.Unlock()
 				
 				foundLeader = true
+				resp.Body.Close() // Close the body *inside* the success block
 				break // Stop polling once we find the leader
 			}
+			
 			if resp != nil {
 				resp.Body.Close()
 			}
 		}
+		
 		if !foundLeader {
 			log.Println("No Namenode leader found in this poll cycle.")
-			mutex.Lock()
-			currentLeaderAddress = "" 
-			mutex.Unlock()
+			// Use the 'Write' lock
+			leaderLock.Lock()
+			currentLeaderAddress = "" // No known leader
+			leaderLock.Unlock()
+		}
 	}
-}
 }
 
 // GetCurrentLeader is a thread-safe way to read the leader's address
 func GetCurrentLeader() string {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	// Use the 'Read' lock
+	leaderLock.RLock()
+	defer leaderLock.RUnlock()
 	return currentLeaderAddress
 }
-
