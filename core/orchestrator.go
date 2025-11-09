@@ -20,6 +20,31 @@ type ClientUploadRequest struct {
 
 // var currentLeaderAddress string // the is the url:port of the current raft cluster leader
 
+// HandleHeartbeat is called by the datanode's once every few seconds
+// the DN's send the LB info about how many current active writes they have, the loadb updates its active count in the heap accordingly
+func HandleHeartbeat(c *gin.Context) {
+	//temp struct to store the incoming data from the DN
+	var heartbeat struct {
+		NodeID       string `json:"node_id"` // This is the Datanode's URL
+		ActiveWrites int    `json:"active_writes"`
+	}
+
+	if err := c.BindJSON(&heartbeat); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid heartbeat"})
+		return
+	}
+
+	//we now call the UpdateServerLoad func in heap.go which takes the nodeID and the active count and updates the heap and reheapify's
+	err := models.UpdateServerLoad(heartbeat.NodeID, heartbeat.ActiveWrites)
+	if err != nil {
+		// this error happens if the DN sent a heartbeat but the DN is not in the heap
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	// on success
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
 func HandleUpload (c *gin.Context) {
 
 	// this function basically recieves Filename, ChunkID and Index and decides on which chunk is stored where and informs the raft leader the same

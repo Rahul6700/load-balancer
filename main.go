@@ -19,6 +19,7 @@ func main() {
 	r.POST("/deleteServer", core.DeleteServer)
 	
 	r.POST("/uploadFile", core.HandleUpload)
+	r.POST("/heartbeat", core.HandleHeartbeat)
 	
 	//r.NoRoute(core.Balancer)
 
