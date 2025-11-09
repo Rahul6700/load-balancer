@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"container/heap"
 	"sync"
 )
@@ -23,10 +24,29 @@ func SelectServer() *ServerStruct {
 	// remove the node from the heap
 	server = heap.Pop(&MyHeap).(*ServerStruct)
 	// increment active value
-	server.Active++
+	//server.Active++ -> we comment out this part, this works for our reverse proxy but not our raft part
 	// add it to the heap again to re-heapify so it goes to the right place
 	heap.Push(&MyHeap, server)
 	return server
+}
+
+// new raft exclusive function, the datanode sends a heartbeat to the loadb once every few seconds with its actual current load, which is written 
+// to the loadb's heap. this way we have an actual value of how many are active
+func UpdateServerLoad(url string, activeWrites int) error {
+	lock.Lock()
+	defer lock.Unlock()
+
+	for _, server := range MyHeap {
+		if server.URL == url {
+			// Set the 'Active' count to the "true" value
+			server.Active = activeWrites
+			
+			// Re-sort the heap with the new, correct priority
+			heap.Fix(&MyHeap, server.Index)
+			return nil
+		}
+	}
+	return fmt.Errorf("server %s not found in heap", url)
 }
 
 func DoneWithServer(server *ServerStruct) {
